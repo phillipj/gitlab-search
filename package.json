@@ -1,0 +1,32 @@
+{
+  "name": "gitlab-search",
+  "version": "0.1.0",
+  "main": "lib/js/src/Main.bs.js",
+  "scripts": {
+    "build": "bsb -make-world",
+    "start": "bsb -make-world -w",
+    "clean": "bsb -clean-world",
+    "postinstall": "npm run build"
+  },
+  "keywords": [
+    "GitLab"
+  ],
+  "author": "Phillip Johnsen <johphi@gmail.com>",
+  "license": "MIT",
+  "repository": "github:phillipj/gitlab-search",
+  "files": [
+    "bin",
+    "bsconfig.json",
+    "lib/js",
+    "src"
+  ],
+  "dependencies": {
+    "@glennsl/bs-json": "3.0.0",
+    "bs-chalk": "0.2.1",
+    "bs-node-fetch": "0.3.0",
+    "bs-platform": "4.0.18",
+    "commander": "2.19.0",
+    "rc": "1.2.8"
+  },
+  "bin": "bin/gitlab-search.js"
+}

@@ -1,0 +1,21 @@
+{
+  "name": "gitlab-repo-search",
+  "version": "0.1.0",
+  "sources": {
+    "dir" : "src",
+    "subdirs" : true
+  },
+  "package-specs": {
+    "module": "commonjs",
+  },
+  "suffix": ".bs.js",
+  "bs-dependencies": [
+    "bs-chalk",
+    "bs-node-fetch",
+    "@glennsl/bs-json"
+  ],
+  "warnings": {
+    "error" : "+101"
+  },
+  "refmt": 3
+}
