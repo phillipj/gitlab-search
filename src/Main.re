@@ -1,4 +1,6 @@
-let program = Commander.(make() |> version("0.0.1"));
+let packageJson = [%bs.raw {| require("../../../package.json") |}];
+
+let program = Commander.(make() |> version(packageJson##version));
 
 let main = (args, _options) => {
   // daring to do an unsafe get operation below because commander.js *should* have
