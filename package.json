@@ -17,7 +17,6 @@
   "files": [
     "bin",
     "bsconfig.json",
-    "lib/js",
     "src"
   ],
   "dependencies": {
