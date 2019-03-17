@@ -43,7 +43,7 @@ Commander.(
   program
   |> command("setup")
   |> description("create configuration file")
-  |> arguments("<personal access token>")
+  |> arguments("<personal-access-token>")
   |> optionWithDefault(
        "--domain <name>",
        "domain name of GitLab API server",
