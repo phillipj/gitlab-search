@@ -2,7 +2,7 @@ open Bs_node_fetch;
 open Belt;
 
 type group = {
-  id: int,
+  id: string,
   name: string,
 };
 
@@ -23,7 +23,7 @@ module Decode = {
   open Json.Decode;
 
   let group = json => {
-    id: json |> field("id", int),
+    id: json |> field("id", int) |> string_of_int,
     name: json |> field("name", string),
   };
   let groups = json => json |> array(group);
@@ -68,8 +68,19 @@ let request = (relativeUrl, decoder) => {
   );
 };
 
+let groupsFromStringNames = namesAsString => {
+  let names = Js.String.split(",", namesAsString);
+  let groups = Array.map(names, name => {id: name, name});
+
+  Js.Promise.resolve(groups);
+};
+
 // https://docs.gitlab.com/ee/api/groups.html#list-groups
-let fetchAllGroups = () => request("/groups", Decode.groups);
+let fetchGroups = (groupsNames: option(string)) =>
+  switch (groupsNames) {
+  | Some(names) => groupsFromStringNames(names)
+  | None => request("/groups", Decode.groups)
+  };
 
 // https://docs.gitlab.com/ee/api/groups.html#list-a-groups-projects
 let fetchProjectsInGroups = (groups: array(group)) => {
@@ -80,10 +91,7 @@ let fetchProjectsInGroups = (groups: array(group)) => {
       // inferred as a project -- why on earth would that happen when the compiler gets very
       // explicit information about the incoming function argument is a list of groups
       (group: group) =>
-      request(
-        "/groups/" ++ string_of_int(group.id) ++ "/projects",
-        Decode.projects,
-      )
+      request("/groups/" ++ group.id ++ "/projects", Decode.projects)
     );
 
   // this list <-> array is quite a pain in the backside, but don't have much choice

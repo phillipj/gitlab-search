@@ -2,13 +2,14 @@ let packageJson = [%bs.raw {| require("../../../package.json") |}];
 
 let program = Commander.(make() |> version(packageJson##version));
 
-let main = (args, _options) => {
+let main = (args, options) => {
   // daring to do an unsafe get operation below because commander.js *should* have
   // ensured the search term argument is available before invoking this function
   let searchTerm = Belt.Array.getUnsafe(args, 0);
+  let groupsFilter = Commander.getOption(options, "groups");
 
   Js.Promise.(
-    GitLab.fetchAllGroups()
+    GitLab.fetchGroups(groupsFilter)
     |> then_(GitLab.fetchProjectsInGroups)
     |> then_(GitLab.searchForInProjects(searchTerm))
     |> then_(results => resolve(Print.searchResults(searchTerm, results)))
@@ -28,7 +29,15 @@ let setup = (args, options) => {
   Config.writeToFile({domain, token}, dir);
 };
 
-Commander.(program |> arguments("<search-term>") |> action(main));
+Commander.(
+  program
+  |> arguments("<search-term>")
+  |> option(
+       "--groups <group-names>",
+       "group(s) to find repositories in (separated with comma)",
+     )
+  |> action(main)
+);
 
 Commander.(
   program
