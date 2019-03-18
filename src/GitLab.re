@@ -112,6 +112,7 @@ let searchUrlParameter = (term, filename): string => {
   "&search=" ++ Js.Global.encodeURIComponent(term) ++ filename;
 };
 
+// https://docs.gitlab.com/ee/api/search.html#scope-blobs-2
 let searchInProjects =
     (term: string, filename: option(string), projects: array(project))
     : Js.Promise.t(array((project, array(searchResult)))) => {
