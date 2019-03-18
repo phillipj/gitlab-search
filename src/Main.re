@@ -39,7 +39,7 @@ Commander.(
      )
   |> option(
        "-f, --filename <filename>",
-       "only search for contents in given a given file",
+       "only search for contents in given a file, glob matching with wildcards (*)",
      )
   |> action(main)
 );
