@@ -12,6 +12,11 @@ type project = {
   web_url: string,
 };
 
+type searchCriterias = {
+  term: string,
+  filename: option(string),
+};
+
 type searchResult = {
   data: string,
   filename: string,
@@ -46,6 +51,10 @@ module Decode = {
     array(searchResult, json),
   );
 };
+
+// this is primarily made for readability, as creating the record below from outside this
+// GitLab module is surely possible, but is far from self-descriptive
+let makeCriterias = (~term, ~filename) => {term, filename};
 
 let configResult = Config.loadFromFile();
 
@@ -103,18 +112,18 @@ let fetchProjectsInGroups = (groups: array(group)) => {
   );
 };
 
-let searchUrlParameter = (term, filename): string => {
+let searchUrlParameter = (criterias: searchCriterias): string => {
   let filename =
-    Option.mapWithDefault(filename, "", filename =>
+    Option.mapWithDefault(criterias.filename, "", filename =>
       " filename:" ++ Js.Global.encodeURIComponent(filename)
     );
 
-  "&search=" ++ Js.Global.encodeURIComponent(term) ++ filename;
+  "&search=" ++ Js.Global.encodeURIComponent(criterias.term) ++ filename;
 };
 
 // https://docs.gitlab.com/ee/api/search.html#scope-blobs-2
 let searchInProjects =
-    (term: string, filename: option(string), projects: array(project))
+    (criterias: searchCriterias, projects: array(project))
     : Js.Promise.t(array((project, array(searchResult)))) => {
   let requests =
     Array.map(projects, project =>
@@ -122,7 +131,7 @@ let searchInProjects =
         "/projects/"
         ++ string_of_int(project.id)
         ++ "/search?scope=blobs"
-        ++ searchUrlParameter(term, filename),
+        ++ searchUrlParameter(criterias),
         Decode.searchResults(project),
       )
     );
