@@ -34,7 +34,7 @@ Commander.(
   program
   |> arguments("<search-term>")
   |> option(
-       "--groups <group-names>",
+       "-g, --groups <group-names>",
        "group(s) to find repositories in (separated with comma)",
      )
   |> option(
