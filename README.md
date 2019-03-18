@@ -39,7 +39,8 @@ $ gitlab-search [options] [command] <search-term>
 Options:
   -V, --version                            output the version number
   -g, --groups <group-names>               group(s) to find repositories in (separated with comma)
-  -f, --filename <filename>                only search for contents in given a given file
+  -f, --filename <filename>                only search for contents in given a file, glob matching with wildcards (*)
+  -e, --extension <file-extension>         only search for contents in files with given extension
   -h, --help                               output usage information
 
 Commands:
