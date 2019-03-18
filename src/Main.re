@@ -9,6 +9,7 @@ let main = (args, options) => {
       // ensured the search term argument is available before invoking this function
       ~term=Belt.Array.getUnsafe(args, 0),
       ~filename=Commander.getOption(options, "filename"),
+      ~extension=Commander.getOption(options, "extension"),
     );
 
   let groups = Commander.getOption(options, "groups");
@@ -46,6 +47,10 @@ Commander.(
   |> option(
        "-f, --filename <filename>",
        "only search for contents in given a file, glob matching with wildcards (*)",
+     )
+  |> option(
+       "-e, --extension <file-extension>",
+       "only search for contents in files with given extension",
      )
   |> action(main)
 );

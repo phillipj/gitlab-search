@@ -15,6 +15,7 @@ type project = {
 type searchCriterias = {
   term: string,
   filename: option(string),
+  extension: option(string),
 };
 
 type searchResult = {
@@ -54,7 +55,11 @@ module Decode = {
 
 // this is primarily made for readability, as creating the record below from outside this
 // GitLab module is surely possible, but is far from self-descriptive
-let makeCriterias = (~term, ~filename) => {term, filename};
+let makeCriterias = (~term, ~filename, ~extension) => {
+  term,
+  filename,
+  extension,
+};
 
 let configResult = Config.loadFromFile();
 
@@ -118,7 +123,15 @@ let searchUrlParameter = (criterias: searchCriterias): string => {
       " filename:" ++ Js.Global.encodeURIComponent(filename)
     );
 
-  "&search=" ++ Js.Global.encodeURIComponent(criterias.term) ++ filename;
+  let extension =
+    Option.mapWithDefault(criterias.extension, "", extension =>
+      " extension:" ++ Js.Global.encodeURIComponent(extension)
+    );
+
+  "&search="
+  ++ Js.Global.encodeURIComponent(criterias.term)
+  ++ filename
+  ++ extension;
 };
 
 // https://docs.gitlab.com/ee/api/search.html#scope-blobs-2
