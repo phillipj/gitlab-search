@@ -34,7 +34,16 @@ $ gitlab-search setup --help
 Searching through all the repositories you've got access to:
 
 ```
-$ gitlab-search <what you are looking for>
+$ gitlab-search [options] [command] <search-term>
+
+Options:
+  -V, --version                            output the version number
+  -g, --groups <group-names>               group(s) to find repositories in (separated with comma)
+  -f, --filename <filename>                only search for contents in given a given file
+  -h, --help                               output usage information
+
+Commands:
+  setup [options] <personal-access-token>  create configuration file
 ```
 
 ## License
