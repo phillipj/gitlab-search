@@ -1,6 +1,6 @@
 {
   "name": "gitlab-search",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "main": "lib/js/src/Main.bs.js",
   "scripts": {
     "build": "bsb -make-world",
