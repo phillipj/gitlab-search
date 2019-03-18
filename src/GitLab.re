@@ -103,16 +103,25 @@ let fetchProjectsInGroups = (groups: array(group)) => {
   );
 };
 
-let searchForInProjects =
-    (searchTerm, projects: array(project))
+let searchUrlParameter = (term, filename): string => {
+  let filename =
+    Option.mapWithDefault(filename, "", filename =>
+      " filename:" ++ Js.Global.encodeURIComponent(filename)
+    );
+
+  "&search=" ++ Js.Global.encodeURIComponent(term) ++ filename;
+};
+
+let searchInProjects =
+    (term: string, filename: option(string), projects: array(project))
     : Js.Promise.t(array((project, array(searchResult)))) => {
   let requests =
     Array.map(projects, project =>
       request(
         "/projects/"
         ++ string_of_int(project.id)
-        ++ "/search?scope=blobs&search="
-        ++ Js.Global.encodeURIComponent(searchTerm),
+        ++ "/search?scope=blobs"
+        ++ searchUrlParameter(term, filename),
         Decode.searchResults(project),
       )
     );

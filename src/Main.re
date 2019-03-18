@@ -5,14 +5,15 @@ let program = Commander.(make() |> version(packageJson##version));
 let main = (args, options) => {
   // daring to do an unsafe get operation below because commander.js *should* have
   // ensured the search term argument is available before invoking this function
-  let searchTerm = Belt.Array.getUnsafe(args, 0);
-  let groupsFilter = Commander.getOption(options, "groups");
+  let term = Belt.Array.getUnsafe(args, 0);
+  let filename = Commander.getOption(options, "filename");
+  let groups = Commander.getOption(options, "groups");
 
   Js.Promise.(
-    GitLab.fetchGroups(groupsFilter)
+    GitLab.fetchGroups(groups)
     |> then_(GitLab.fetchProjectsInGroups)
-    |> then_(GitLab.searchForInProjects(searchTerm))
-    |> then_(results => resolve(Print.searchResults(searchTerm, results)))
+    |> then_(GitLab.searchInProjects(term, filename))
+    |> then_(results => resolve(Print.searchResults(term, results)))
     |> catch(err => resolve(Js.log2("Something exploded!", err)))
     |> ignore
   );
@@ -35,6 +36,10 @@ Commander.(
   |> option(
        "--groups <group-names>",
        "group(s) to find repositories in (separated with comma)",
+     )
+  |> option(
+       "-f, --filename <filename>",
+       "only search for contents in given a given file",
      )
   |> action(main)
 );
