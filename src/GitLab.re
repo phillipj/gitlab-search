@@ -14,7 +14,8 @@ type project = {
 
 type searchFilter =
   | Filename(option(string))
-  | Extension(option(string));
+  | Extension(option(string))
+  | Path(option(string));
 
 type searchCriterias = {
   term: string,
@@ -58,9 +59,9 @@ module Decode = {
 
 // this is primarily made for readability, as creating the record below from outside this
 // GitLab module is surely possible, but is far from self-descriptive
-let makeCriterias = (~term, ~filename, ~extension) => {
+let makeCriterias = (~term, ~filename, ~extension, ~path) => {
   term,
-  filters: [|Filename(filename), Extension(extension)|],
+  filters: [|Filename(filename), Extension(extension), Path(path)|],
 };
 
 let configResult = Config.loadFromFile();
@@ -127,6 +128,7 @@ let searchUrlParameter = (criterias: searchCriterias): string => {
           switch (filter) {
           | Filename(value) => ("filename", value)
           | Extension(value) => ("extension", value)
+          | Path(value) => ("path", value)
           }
         )
       ->keepMap(((parameterName, optionalValue)) =>

@@ -10,6 +10,7 @@ let main = (args, options) => {
       ~term=Belt.Array.getUnsafe(args, 0),
       ~filename=Commander.getOption(options, "filename"),
       ~extension=Commander.getOption(options, "extension"),
+      ~path=Commander.getOption(options, "path"),
     );
 
   let groups = Commander.getOption(options, "groups");
@@ -52,6 +53,7 @@ Commander.(
        "-e, --extension <file-extension>",
        "only search for contents in files with given extension",
      )
+  |> option("-p, --path <path>", "only search in files in the given path")
   |> action(main)
 );
 
