@@ -3,17 +3,19 @@ let packageJson = [%bs.raw {| require("../../../package.json") |}];
 let program = Commander.(make() |> version(packageJson##version));
 
 let main = (args, options) => {
+  let getOption = optionName => Commander.getOption(options, optionName);
+  let groups = getOption("groups");
   let criterias =
-    GitLab.makeCriterias(
+    GitLab.{
       // daring to do an unsafe get operation below because commander.js *should* have
       // ensured the search term argument is available before invoking this function
-      ~term=Belt.Array.getUnsafe(args, 0),
-      ~filename=Commander.getOption(options, "filename"),
-      ~extension=Commander.getOption(options, "extension"),
-      ~path=Commander.getOption(options, "path"),
-    );
-
-  let groups = Commander.getOption(options, "groups");
+      term: Belt.Array.getUnsafe(args, 0),
+      filters: [|
+        Filename(getOption("filename")),
+        Extension(getOption("extension")),
+        Path(getOption("path")),
+      |],
+    };
 
   Js.Promise.(
     GitLab.fetchGroups(groups)

@@ -57,13 +57,6 @@ module Decode = {
   );
 };
 
-// this is primarily made for readability, as creating the record below from outside this
-// GitLab module is surely possible, but is far from self-descriptive
-let makeCriterias = (~term, ~filename, ~extension, ~path) => {
-  term,
-  filters: [|Filename(filename), Extension(extension), Path(path)|],
-};
-
 let configResult = Config.loadFromFile();
 
 let request = (relativeUrl, decoder) => {
