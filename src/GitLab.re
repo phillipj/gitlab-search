@@ -12,10 +12,13 @@ type project = {
   web_url: string,
 };
 
+type searchFilter =
+  | Filename(option(string))
+  | Extension(option(string));
+
 type searchCriterias = {
   term: string,
-  filename: option(string),
-  extension: option(string),
+  filters: array(searchFilter),
 };
 
 type searchResult = {
@@ -57,8 +60,7 @@ module Decode = {
 // GitLab module is surely possible, but is far from self-descriptive
 let makeCriterias = (~term, ~filename, ~extension) => {
   term,
-  filename,
-  extension,
+  filters: [|Filename(filename), Extension(extension)|],
 };
 
 let configResult = Config.loadFromFile();
@@ -118,20 +120,26 @@ let fetchProjectsInGroups = (groups: array(group)) => {
 };
 
 let searchUrlParameter = (criterias: searchCriterias): string => {
-  let filename =
-    Option.mapWithDefault(criterias.filename, "", filename =>
-      " filename:" ++ Js.Global.encodeURIComponent(filename)
-    );
-
-  let extension =
-    Option.mapWithDefault(criterias.extension, "", extension =>
-      " extension:" ++ Js.Global.encodeURIComponent(extension)
+  let filters =
+    Array.(
+      criterias.filters
+      ->map(filter =>
+          switch (filter) {
+          | Filename(value) => ("filename", value)
+          | Extension(value) => ("extension", value)
+          }
+        )
+      ->keepMap(((parameterName, optionalValue)) =>
+          Option.map(optionalValue, value =>
+            parameterName ++ ":" ++ Js.Global.encodeURIComponent(value)
+          )
+        )
     );
 
   "&search="
   ++ Js.Global.encodeURIComponent(criterias.term)
-  ++ filename
-  ++ extension;
+  ++ " "
+  ++ Js.Array.joinWith(" ", filters);
 };
 
 // https://docs.gitlab.com/ee/api/search.html#scope-blobs-2
