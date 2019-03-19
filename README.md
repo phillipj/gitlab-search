@@ -41,6 +41,7 @@ Options:
   -g, --groups <group-names>               group(s) to find repositories in (separated with comma)
   -f, --filename <filename>                only search for contents in given a file, glob matching with wildcards (*)
   -e, --extension <file-extension>         only search for contents in files with given extension
+  -p, --path <path>                        only search in files in the given path
   -h, --help                               output usage information
 
 Commands:
