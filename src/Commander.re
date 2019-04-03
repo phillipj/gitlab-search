@@ -65,6 +65,23 @@ let action: ((array(string), actionFnOptions) => unit, t) => t =
 [@bs.get_index]
 external getOption: (actionFnOptions, string) => option(string) = "";
 
+[@bs.get_index]
+external getOptionAsBoolean: (actionFnOptions, string) => option(bool) = "";
+
+/**
+  This overrides the Commander.getOptionAsBoolean() function for users of this module because commander.js does
+  return an *actual* boolean value when an option exist that doesn't have an argument. That will make commander.js
+  return the CLI option's value as a boolean, rather than a string as it does for other options that accepts an argument.
+
+  Since returning an optional value wrapping a boolean to users of this module, feels a bit clunky, it converts that
+  optional value that's returned from commander.js into an concrete bool value instead.
+*/
+let getOptionAsBoolean = (actionFnOptions, optionName): bool => {
+  let maybeBoolValue = getOptionAsBoolean(actionFnOptions, optionName);
+
+  Belt.Option.getWithDefault(maybeBoolValue, false);
+};
+
 [@bs.send.pipe: t] external arguments: string => t = "";
 [@bs.send.pipe: t] external command: string => t = "";
 [@bs.send.pipe: t] external description: string => t = "";

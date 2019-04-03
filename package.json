@@ -21,7 +21,7 @@
   ],
   "dependencies": {
     "@glennsl/bs-json": "3.0.0",
-    "bs-axios": "0.0.41",
+    "bs-axios": "0.0.42",
     "bs-chalk": "0.2.1",
     "bs-platform": "5.0.0",
     "commander": "2.19.0",

@@ -67,7 +67,10 @@ let request = (relativeUrl, decoder) => {
     };
 
   let headers = Axios.Headers.fromObj({"Private-Token": config.token});
-  let options = Axios.makeConfig(~headers, ());
+  let httpsAgent =
+    Axios.Agent.Https.config(~rejectUnauthorized=!config.ignoreSSL, ())
+    |> Axios.Agent.Https.create;
+  let options = Axios.makeConfig(~headers, ~httpsAgent, ());
   let url = "https://" ++ config.domain ++ "/api/v4" ++ relativeUrl;
 
   Js.Promise.(

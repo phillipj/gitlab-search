@@ -36,8 +36,14 @@ let setup = (args, options) => {
   // options below has default values set in their definition so they always has a value
   let dir = Belt.Option.getExn(Commander.getOption(options, "dir"));
   let domain = Belt.Option.getExn(Commander.getOption(options, "domain"));
+  let ignoreSSL = Commander.getOptionAsBoolean(options, "ignoreSsl");
 
-  Config.writeToFile({domain, token}, dir);
+  let configPath = Config.writeToFile({domain, token, ignoreSSL}, dir);
+  Print.successful(
+    "Successfully wrote config to "
+    ++ configPath
+    ++ ", gitlab-search is now ready to be used",
+  );
 };
 
 Commander.(
@@ -64,6 +70,10 @@ Commander.(
   |> command("setup")
   |> description("create configuration file")
   |> arguments("<personal-access-token>")
+  |> option(
+       "--ignore-ssl",
+       "ignore invalid SSL certificate from the GitLab API server",
+     )
   |> optionWithDefault(
        "--domain <name>",
        "domain name of GitLab API server",

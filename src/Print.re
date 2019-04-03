@@ -46,3 +46,5 @@ let searchResults =
     },
   );
 };
+
+let successful = message => Js.log(green({js|✔|js}) ++ " " ++ message);

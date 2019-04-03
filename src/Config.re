@@ -1,6 +1,9 @@
+open Belt;
+
 type t = {
   domain: string,
   token: string,
+  ignoreSSL: bool,
 };
 
 // As the type below is passed to JavaScript as a configuration object,
@@ -16,6 +19,8 @@ type rcConfig = {
   token: string,
   [@bs.optional]
   config: string,
+  [@bs.optional]
+  ignoreSSL: bool,
 };
 
 // https://www.npmjs.com/package/rc
@@ -26,22 +31,23 @@ let defaultDirectory = ".";
 
 let loadFromFile = (): Belt.Result.t(t, string) => {
   let result = rc("gitlabsearch");
-  let domain = Belt.Option.getWithDefault(domainGet(result), defaultDomain);
+  let domain = Option.getWithDefault(domainGet(result), defaultDomain);
+  let ignoreSSL = Option.getWithDefault(ignoreSSLGet(result), false);
 
   switch (configGet(result)) {
   | Some(configPath) =>
-    Belt.Option.mapWithDefault(
+    Option.mapWithDefault(
       tokenGet(result),
-      Belt.Result.Error(
+      Result.Error(
         "No personal access token was found in "
         ++ configPath
         ++ ", please run setup again!",
       ),
       token =>
-      Belt.Result.Ok({domain, token})
+      Result.Ok({domain, token, ignoreSSL})
     )
   | None =>
-    Belt.Result.Error(
+    Result.Error(
       "Could not find .gitlabsearchrc configuration file anywhere, have you run setup yet?",
     )
   };
@@ -50,11 +56,14 @@ let loadFromFile = (): Belt.Result.t(t, string) => {
 let writeToFile = (config: t, directory) => {
   let filePath = Node.Path.join2(directory, ".gitlabsearchrc");
   let domain = config.domain == defaultDomain ? None : Some(config.domain);
-  let content = rcConfig(~domain?, ~token=config.token, ());
+  let ignoreSSL = config.ignoreSSL ? Some(true) : None;
+  let content = rcConfig(~domain?, ~ignoreSSL?, ~token=config.token, ());
 
   Node.Fs.writeFileSync(
     filePath,
     Js.Option.getExn(Js.Json.stringifyAny(content)),
     `utf8,
   );
+
+  filePath;
 };
