@@ -1,4 +1,3 @@
-open Bs_node_fetch;
 open Belt;
 
 type group = {
@@ -67,13 +66,13 @@ let request = (relativeUrl, decoder) => {
       raise(Js.Exn.raiseError(failureReason))
     };
 
-  let headers = HeadersInit.make({"Private-Token": config.token});
-  let options = RequestInit.make(~headers, ());
+  let headers = Axios.Headers.fromObj({"Private-Token": config.token});
+  let options = Axios.makeConfig(~headers, ());
   let url = "https://" ++ config.domain ++ "/api/v4" ++ relativeUrl;
 
   Js.Promise.(
-    fetchWithInit(url, options)
-    |> then_(Response.json)
+    Axios.getc(url, options)
+    |> then_(response => resolve(response##data))
     |> then_(json => resolve(decoder(json)))
   );
 };
