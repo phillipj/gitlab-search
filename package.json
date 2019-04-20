@@ -5,7 +5,7 @@
     "build": "rimraf dist && bsb -make-world && ncc build lib/js/src/Main.bs.js --out dist",
     "start": "bsb -make-world -w",
     "clean": "bsb -clean-world",
-    "postinstall": "npm run build"
+    "prepublish": "npm run build"
   },
   "keywords": [
     "GitLab"
