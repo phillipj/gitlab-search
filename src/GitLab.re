@@ -91,7 +91,7 @@ let groupsFromStringNames = namesAsString => {
 let fetchGroups = (groupsNames: option(string)) =>
   switch (groupsNames) {
   | Some(names) => groupsFromStringNames(names)
-  | None => request("/groups", Decode.groups)
+  | None => request("/groups?per_page=1000", Decode.groups)
   };
 
 // https://docs.gitlab.com/ee/api/groups.html#list-a-groups-projects
@@ -103,7 +103,7 @@ let fetchProjectsInGroups = (groups: array(group)) => {
       // inferred as a project -- why on earth would that happen when the compiler gets very
       // explicit information about the incoming function argument is a list of groups
       (group: group) =>
-      request("/groups/" ++ group.id ++ "/projects", Decode.projects)
+      request("/groups/" ++ group.id ++ "/projects?per_page=1000", Decode.projects)
     );
 
   // this list <-> array is quite a pain in the backside, but don't have much choice
