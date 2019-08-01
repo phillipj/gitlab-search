@@ -24,7 +24,7 @@ type rcConfig = {
 };
 
 // https://www.npmjs.com/package/rc
-[@bs.module] external rc: string => rcConfig = "";
+[@bs.module] external rc: string => rcConfig = "rc";
 
 let defaultDomain = "gitlab.com";
 let defaultDirectory = ".";

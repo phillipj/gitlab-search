@@ -13,13 +13,14 @@ type t;
 type actionFnOptions;
 
 /* this basically does a require("commander") behind the scenes and assigns the result to the type t */
-[@bs.module] external commander: t = "";
+[@bs.module] external commander: t = "commander";
 
 /* an idiomatic make() function to get a hold of commander.js */
 let make = () => commander;
 
 [@bs.send.pipe: t]
-external action: (unit /* in reality variadic arguments */ => unit) => t = "";
+external action: (unit /* in reality variadic arguments */ => unit) => t =
+  "action";
 
 /**
   This overrides the Commander.action() function for users of this module, needed because
@@ -82,12 +83,12 @@ let getOptionAsBoolean = (actionFnOptions, optionName): bool => {
   Belt.Option.getWithDefault(maybeBoolValue, false);
 };
 
-[@bs.send.pipe: t] external arguments: string => t = "";
-[@bs.send.pipe: t] external command: string => t = "";
-[@bs.send.pipe: t] external description: string => t = "";
-[@bs.send.pipe: t] external help: unit = "";
-[@bs.send.pipe: t] external option: (string, string) => t = "";
+[@bs.send.pipe: t] external arguments: string => t = "arguments";
+[@bs.send.pipe: t] external command: string => t = "command";
+[@bs.send.pipe: t] external description: string => t = "description";
+[@bs.send.pipe: t] external help: unit = "help";
+[@bs.send.pipe: t] external option: (string, string) => t = "option";
 [@bs.send.pipe: t]
 external optionWithDefault: (string, string, string) => t = "option";
-[@bs.send.pipe: t] external parse: array(string) => t = "";
-[@bs.send.pipe: t] external version: string => t = "";
+[@bs.send.pipe: t] external parse: array(string) => t = "parse";
+[@bs.send.pipe: t] external version: string => t = "version";
