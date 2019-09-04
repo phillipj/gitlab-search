@@ -48,6 +48,24 @@ Commands:
   setup [options] <personal-access-token>  create configuration file
 ```
 
+## Use with Self-Managed GitLab
+
+To search a self-hosted installation of GitLab, `setup` has options for, among other things, setting a custom domain:
+
+```
+$ gitlab-search setup --help
+
+Usage: setup [options] <personal-access-token>
+
+create configuration file
+
+Options:
+  --ignore-ssl     ignore invalid SSL certificate from the GitLab API server
+  --domain <name>  domain name of GitLab API server (default: "gitlab.com")
+  --dir <path>     path to directory to save configuration file in (default: ".")
+  -h, --help       output usage information
+```
+
 ## License
 
 MIT
