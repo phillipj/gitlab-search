@@ -60,10 +60,10 @@ Usage: setup [options] <personal-access-token>
 create configuration file
 
 Options:
-  --ignore-ssl     ignore invalid SSL certificate from the GitLab API server
-  --domain <name>  domain name of GitLab API server (default: "gitlab.com")
-  --dir <path>     path to directory to save configuration file in (default: ".")
-  -h, --help       output usage information
+  --ignore-ssl         ignore invalid SSL certificate from the GitLab API server
+  --api-domain <name>  domain name of GitLab API server (default: "gitlab.com")
+  --dir <path>         path to directory to save configuration file in (default: ".")
+  -h, --help           output usage information
 ```
 
 ## License
