@@ -1,6 +1,6 @@
 {
   "name": "gitlab-search",
-  "version": "0.8.2",
+  "version": "1.0.0",
   "scripts": {
     "build": "rimraf dist && bsb -make-world && ncc build lib/js/src/Main.bs.js --out dist",
     "start": "bsb -make-world -w",
