@@ -15,7 +15,8 @@
     "@glennsl/bs-json"
   ],
   "warnings": {
-    "error" : "+101"
+    "error": "+A-3-44-102",
+    "number": "+A-48-40-42"
   },
   "refmt": 3
 }
