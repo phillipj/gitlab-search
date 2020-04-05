@@ -23,7 +23,7 @@
     "@zeit/ncc": "^0.18.0",
     "bs-axios": "0.0.42",
     "bs-chalk": "^0.2.1",
-    "bs-platform": "^5.0.0",
+    "bs-platform": "^5.2.1",
     "commander": "^2.19.0",
     "rc": "^1.2.8",
     "rimraf": "^2.6.3"
