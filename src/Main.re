@@ -36,9 +36,13 @@ let setup = (args, options) => {
   // options below has default values set in their definition so they always has a value
   let dir = Belt.Option.getExn(Commander.getOption(options, "dir"));
   let domain = Belt.Option.getExn(Commander.getOption(options, "apiDomain"));
+  let protocol =
+    Belt.Option.getExn(Commander.getOption(options, "protocol"))
+    |> Config.Protocol.fromString;
   let ignoreSSL = Commander.getOptionAsBoolean(options, "ignoreSsl");
 
-  let configPath = Config.writeToFile({domain, token, ignoreSSL}, dir);
+  let configPath =
+    Config.writeToFile({domain, token, ignoreSSL, protocol}, dir);
   Print.successful(
     "Successfully wrote config to "
     ++ configPath
@@ -83,6 +87,11 @@ Commander.(
        "--dir <path>",
        "path to directory to save configuration file in",
        Config.defaultDirectory,
+     )
+  |> optionWithDefault(
+       "--protocol <http | https>",
+       "protocol to use when sending requests to GitLab API server",
+       Config.defaultProtocol,
      )
   |> action(setup)
 );
