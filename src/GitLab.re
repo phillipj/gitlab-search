@@ -58,6 +58,16 @@ module Decode = {
 
 let configResult = Config.loadFromFile();
 
+let createHttpsAgent = (config: Config.t) => {
+  switch (config.protocol) {
+  | HTTP => None
+  | HTTPS =>
+    Axios.Agent.Https.config(~rejectUnauthorized=!config.ignoreSSL, ())
+    ->Axios.Agent.Https.create
+    ->Some
+  };
+};
+
 let request = (relativeUrl, decoder) => {
   let config =
     switch (configResult) {
@@ -67,11 +77,10 @@ let request = (relativeUrl, decoder) => {
     };
 
   let headers = Axios.Headers.fromObj({"Private-Token": config.token});
-  let httpsAgent =
-    Axios.Agent.Https.config(~rejectUnauthorized=!config.ignoreSSL, ())
-    |> Axios.Agent.Https.create;
-  let options = Axios.makeConfig(~headers, ~httpsAgent, ());
-  let url = "https://" ++ config.domain ++ "/api/v4" ++ relativeUrl;
+  let httpsAgent = createHttpsAgent(config);
+  let options = Axios.makeConfig(~headers, ~httpsAgent?, ());
+  let scheme = Config.Protocol.toString(config.protocol) ++ "://";
+  let url = scheme ++ config.domain ++ "/api/v4" ++ relativeUrl;
 
   Js.Promise.(
     Axios.getc(url, options)
@@ -103,7 +112,10 @@ let fetchProjectsInGroups = (groups: array(group)) => {
       // inferred as a project -- why on earth would that happen when the compiler gets very
       // explicit information about the incoming function argument is a list of groups
       (group: group) =>
-      request("/groups/" ++ group.id ++ "/projects?per_page=1000", Decode.projects)
+      request(
+        "/groups/" ++ group.id ++ "/projects?per_page=1000",
+        Decode.projects,
+      )
     );
 
   // this list <-> array is quite a pain in the backside, but don't have much choice

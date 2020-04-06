@@ -34,11 +34,13 @@ let setup = (args, options) => {
   let token = Belt.Array.getExn(args, 0);
 
   // options below has default values set in their definition so they always has a value
-  let dir = Belt.Option.getExn(Commander.getOption(options, "dir"));
-  let domain = Belt.Option.getExn(Commander.getOption(options, "apiDomain"));
+  let directory = Belt.Option.getExn(Commander.getOption(options, "dir"));
+  let domainOrRootUri =
+    Belt.Option.getExn(Commander.getOption(options, "apiDomain"));
   let ignoreSSL = Commander.getOptionAsBoolean(options, "ignoreSsl");
 
-  let configPath = Config.writeToFile({domain, token, ignoreSSL}, dir);
+  let configPath =
+    Config.writeToFile(~domainOrRootUri, ~ignoreSSL, ~token, ~directory);
   Print.successful(
     "Successfully wrote config to "
     ++ configPath
@@ -76,7 +78,7 @@ Commander.(
      )
   |> optionWithDefault(
        "--api-domain <name>",
-       "domain name of GitLab API server",
+       "domain name or root URL of GitLab API server,\nspecify root URL (without trailing slash) to use HTTP instead of HTTPS",
        Config.defaultDomain,
      )
   |> optionWithDefault(
