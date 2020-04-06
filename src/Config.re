@@ -1,9 +1,29 @@
 open Belt;
 
+module Protocol = {
+  type t =
+    | HTTP
+    | HTTPS;
+
+  let toString = protocol =>
+    switch (protocol) {
+    | HTTPS => "https"
+    | HTTP => "http"
+    };
+
+  let fromString = protocol => {
+    switch (protocol) {
+    | "http" => HTTP
+    | _ => HTTPS
+    };
+  };
+};
+
 type t = {
   domain: string,
   token: string,
   ignoreSSL: bool,
+  protocol: Protocol.t,
 };
 
 // As the type below is passed to JavaScript as a configuration object,
@@ -12,7 +32,7 @@ type t = {
 // with field names set as expected etc -- native ReasonML record types
 // won't work because they're internally made with JavaScript arrays
 [@bs.deriving abstract]
-type rcConfig = {
+type serialisedConfig = {
   [@bs.optional]
   domain: string,
   [@bs.optional]
@@ -24,15 +44,36 @@ type rcConfig = {
 };
 
 // https://www.npmjs.com/package/rc
-[@bs.module] external rc: string => rcConfig = "rc";
+[@bs.module] external rc: string => serialisedConfig = "rc";
 
 let defaultDomain = "gitlab.com";
 let defaultDirectory = ".";
 
+let parseProtocolAndDomain = rootApiUriOrOnlyDomain => {
+  let splitOnScheme =
+    rootApiUriOrOnlyDomain |> Js.String.toLowerCase |> Js.String.split("://");
+
+  switch (splitOnScheme) {
+  | [|protocol, domain|] => (Protocol.fromString(protocol), domain)
+  | [|domain|] => (Protocol.HTTPS, domain)
+  | [||] => (Protocol.HTTPS, defaultDomain)
+  | _ =>
+    raise(
+      Js.Exn.raiseError(
+        "Configured API domain does not look like a valid domain or root GitLab API URI, please double check your configuration of: "
+        ++ rootApiUriOrOnlyDomain,
+      ),
+    )
+  };
+};
+
 let loadFromFile = (): Belt.Result.t(t, string) => {
   let result = rc("gitlabsearch");
-  let domain = Option.getWithDefault(domainGet(result), defaultDomain);
   let ignoreSSL = Option.getWithDefault(ignoreSSLGet(result), false);
+  let (protocol, domain) =
+    domainGet(result)
+    ->Option.getWithDefault(defaultDomain)
+    ->parseProtocolAndDomain;
 
   switch (configGet(result)) {
   | Some(configPath) =>
@@ -44,7 +85,7 @@ let loadFromFile = (): Belt.Result.t(t, string) => {
         ++ ", please run setup again!",
       ),
       token =>
-      Result.Ok({domain, token, ignoreSSL})
+      Result.Ok({domain, token, ignoreSSL, protocol})
     )
   | None =>
     Result.Error(
@@ -53,11 +94,13 @@ let loadFromFile = (): Belt.Result.t(t, string) => {
   };
 };
 
-let writeToFile = (config: t, directory) => {
+let writeToFile =
+    (~domainOrRootUri: string, ~ignoreSSL: bool, ~token: string, ~directory) => {
   let filePath = Node.Path.join2(directory, ".gitlabsearchrc");
-  let domain = config.domain == defaultDomain ? None : Some(config.domain);
-  let ignoreSSL = config.ignoreSSL ? Some(true) : None;
-  let content = rcConfig(~domain?, ~ignoreSSL?, ~token=config.token, ());
+  let domain =
+    domainOrRootUri == defaultDomain ? None : Some(domainOrRootUri);
+  let ignoreSSL = ignoreSSL ? Some(true) : None;
+  let content = serialisedConfig(~domain?, ~ignoreSSL?, ~token, ());
 
   Node.Fs.writeFileSync(
     filePath,
