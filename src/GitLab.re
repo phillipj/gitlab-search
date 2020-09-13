@@ -113,7 +113,7 @@ let fetchGroups = (groupsNames: option(string)) => {
   let groupsResult =
     switch (groupsNames) {
     | Some(names) => groupsFromStringNames(names)
-    | None => request("/groups?per_page=1000", Decode.groups)
+    | None => request("/groups?per_page=100", Decode.groups)
     };
 
   Js.Promise.(
@@ -140,7 +140,7 @@ let fetchProjectsInGroups = (groups: array(group)) => {
       // explicit information about the incoming function argument is a list of groups
       (group: group) =>
       request(
-        "/groups/" ++ group.id ++ "/projects?per_page=1000",
+        "/groups/" ++ group.id ++ "/projects?per_page=100",
         Decode.projects,
       )
     );
