@@ -7,7 +7,7 @@ when needed.
 ## Prerequisites
 
 1. Install [Node.js](https://nodejs.org)
-2. Create a [personal GitLab access token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html#creating-a-personal-access-token) with the `api` scope.
+2. Create a [personal GitLab access token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html#creating-a-personal-access-token) with the `read_api` scope.
 
 ## Installation
 
