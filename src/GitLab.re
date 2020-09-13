@@ -1,5 +1,7 @@
 open Belt;
 
+[@bs.val] external debugEnv: Js.Nullable.t(string) = "process.env.DEBUG";
+
 type group = {
   id: string,
   name: string,
@@ -68,6 +70,14 @@ let createHttpsAgent = (config: Config.t) => {
   };
 };
 
+let debugLog = (text): unit => {
+  let isDebugEnabled = !Js.Nullable.isNullable(debugEnv);
+
+  if (isDebugEnabled) {
+    Js.log(text);
+  };
+};
+
 let request = (relativeUrl, decoder) => {
   let config =
     switch (configResult) {
@@ -81,6 +91,8 @@ let request = (relativeUrl, decoder) => {
   let options = Axios.makeConfig(~headers, ~httpsAgent?, ());
   let scheme = Config.Protocol.toString(config.protocol) ++ "://";
   let url = scheme ++ config.domain ++ "/api/v4" ++ relativeUrl;
+
+  debugLog("Requesting: GET " ++ url);
 
   Js.Promise.(
     Axios.getc(url, options)
@@ -97,11 +109,26 @@ let groupsFromStringNames = namesAsString => {
 };
 
 // https://docs.gitlab.com/ee/api/groups.html#list-groups
-let fetchGroups = (groupsNames: option(string)) =>
-  switch (groupsNames) {
-  | Some(names) => groupsFromStringNames(names)
-  | None => request("/groups?per_page=1000", Decode.groups)
-  };
+let fetchGroups = (groupsNames: option(string)) => {
+  let groupsResult =
+    switch (groupsNames) {
+    | Some(names) => groupsFromStringNames(names)
+    | None => request("/groups?per_page=1000", Decode.groups)
+    };
+
+  Js.Promise.(
+    groupsResult
+    |> then_(groups => {
+         let resolvedNames =
+           Array.map(groups, (group: group) => group.name)
+           |> Js.Array.joinWith(", ");
+
+         debugLog("Using groups: " ++ resolvedNames);
+
+         resolve(groups);
+       })
+  );
+};
 
 // https://docs.gitlab.com/ee/api/groups.html#list-a-groups-projects
 let fetchProjectsInGroups = (groups: array(group)) => {
@@ -124,6 +151,15 @@ let fetchProjectsInGroups = (groups: array(group)) => {
     all(requests)
     // concatMany == what usually is called flatten
     |> then_(projects => resolve(Array.concatMany(projects)))
+    |> then_(allProjects => {
+         let resolvedNames =
+           Array.map(allProjects, (project: project) => project.name)
+           |> Js.Array.joinWith(", ");
+
+         debugLog("Using projects: " ++ resolvedNames);
+
+         resolve(allProjects);
+       })
   );
 };
 
