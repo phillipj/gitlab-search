@@ -67,6 +67,21 @@ Options:
   -h, --help           display help for command
 ```
 
+## Debugging
+
+If something seems fishy or you're just curious what `gitlab-search` does under the hood, enabling debug logging helps:
+
+```
+$ DEBUG=1 gitlab-search here-is-my-search-term
+Requesting: GET https://gitlab.com/api/v4/groups?per_page=1000
+Using groups: name-of-group1, name-of-group2
+Requesting: GET https://gitlab.com/api/v4/groups/42/projects?per_page=1000
+Requesting: GET https://gitlab.com/api/v4/groups/1337/projects?per_page=1000
+Using projects: hello-world, my-awesome-website.com
+Requesting: GET https://gitlab.com/api/v4/projects/666/search?scope=blobs&search=here-is-my-search-term
+Requesting: GET https://gitlab.com/api/v4/projects/999/search?scope=blobs&search=here-is-my-search-term
+```
+
 ## License
 
 MIT
