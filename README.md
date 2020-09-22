@@ -1,4 +1,4 @@
-# GitLab Search ![CI Build Status](https://travis-ci.com/phillipj/gitlab-search.svg?branch=master)
+# GitLab Search ![CI Build Status](https://github.com/phillipj/gitlab-search/workflows/CI/badge.svg)
 
 This is a command line tool that allows you to search for contents across all your GitLab repositories.
 That's something GitLab doesn't provide out of the box for non-enterprise users, but is extremely valuable
