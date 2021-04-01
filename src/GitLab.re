@@ -103,6 +103,94 @@ let request = (relativeUrl, decoder) => {
   );
 };
 
+// Helpful when parsing hypermedia Link header values while paginating where URLs will be provided like:
+// <https://gitlab.example.com/api/v4/projects/8/issues/8/notes?page=1&per_page=3>
+let urlWithoutAngleBrackets = url =>
+  Js.String.substring(~from=1, ~to_=Js.String.length(url) - 1, url);
+
+let getNextPaginationUrl = response => {
+  // Example from the docs:
+  // link: <https://gitlab.example.com/api/v4/projects/8/issues/8/notes?page=1&per_page=3>; rel="prev", <https://gitlab.example.com/api/v4/projects/8/issues/8/notes?page=3&per_page=3>; rel="next", <https://gitlab.example.com/api/v4/projects/8/issues/8/notes?page=1&per_page=3>; rel="first", <https://gitlab.example.com/api/v4/projects/8/issues/8/notes?page=3&per_page=3>; rel="last"
+  //
+  // Refs https://docs.gitlab.com/ee/api/README.html#pagination
+  let linkHeader: option(string) = response##headers##link;
+
+  let nextLinkUrl =
+    Option.flatMap(
+      linkHeader,
+      header => {
+        let linkEntries = Js.String.split(",", header);
+        let links =
+          Array.map(
+            linkEntries,
+            linkEntry => {
+              let parts =
+                Js.String.split(";", linkEntry)->Array.map(Js.String.trim);
+
+              let linkUrl = urlWithoutAngleBrackets(Array.getExn(parts, 0));
+              let linkRel = Array.getExn(parts, 1);
+
+              (linkUrl, linkRel);
+            },
+          );
+
+        links
+        ->Array.keepMap(link => {
+            let (url, rel) = link;
+
+            rel == "rel=\"next\"" ? Some(url) : None;
+          })
+        ->Array.get(0);
+      },
+    );
+
+  nextLinkUrl;
+};
+
+type requestUrl =
+  | RelativeUrl(string) // provided initially when kicking off a paginated request
+  | AbsoluteUrl(string); // provided when more pages of results has to be fetched when paginating
+
+let rec paginatedRequest = (url: requestUrl, decoder: Js.Json.t => array('a)) => {
+  let config =
+    switch (configResult) {
+    | Belt.Result.Ok(value) => value
+    | Belt.Result.Error(failureReason) =>
+      raise(Js.Exn.raiseError(failureReason))
+    };
+
+  let headers = Axios.Headers.fromObj({"Private-Token": config.token});
+  let httpsAgent = createHttpsAgent(config);
+  let options = Axios.makeConfig(~headers, ~httpsAgent?, ());
+  let scheme = Config.Protocol.toString(config.protocol) ++ "://";
+  let urlToRequest =
+    switch (url) {
+    | RelativeUrl(path) => scheme ++ config.domain ++ "/api/v4" ++ path
+    | AbsoluteUrl(url) => url
+    };
+
+  debugLog("Requesting: GET " ++ urlToRequest);
+
+  Js.Promise.(
+    Axios.getc(urlToRequest, options)
+    |> then_(response => {
+         let nextUrl = getNextPaginationUrl(response);
+         let json = response##data;
+         let entities = decoder(json);
+
+         switch (nextUrl) {
+         | Some(url) =>
+           paginatedRequest(AbsoluteUrl(url), decoder)
+           |> then_(entitesOnNextPage =>
+                resolve(Array.concat(entities, entitesOnNextPage))
+              )
+
+         | None => resolve(entities)
+         };
+       })
+  );
+};
+
 let groupsFromStringNames = namesAsString => {
   let names = Js.String.split(",", namesAsString);
   let groups = Array.map(names, name => {id: name, name});
@@ -115,7 +203,8 @@ let fetchGroups = (groupsNames: option(string)) => {
   let groupsResult =
     switch (groupsNames) {
     | Some(names) => groupsFromStringNames(names)
-    | None => request("/groups?per_page=100", Decode.groups)
+    | None =>
+      paginatedRequest(RelativeUrl("/groups?per_page=100"), Decode.groups)
     };
 
   Js.Promise.(
@@ -141,8 +230,8 @@ let fetchProjectsInGroups = (groups: array(group)) => {
       // inferred as a project -- why on earth would that happen when the compiler gets very
       // explicit information about the incoming function argument is a list of groups
       (group: group) =>
-      request(
-        "/groups/" ++ group.id ++ "/projects?per_page=100",
+      paginatedRequest(
+        RelativeUrl("/groups/" ++ group.id ++ "/projects?per_page=100"),
         Decode.projects,
       )
     );
