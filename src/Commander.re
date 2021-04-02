@@ -67,6 +67,9 @@ let action: ((array(string), actionFnOptions) => unit, t) => t =
 external getOption: (actionFnOptions, string) => option(string) = "";
 
 [@bs.get_index]
+external getOptionAsInt: (actionFnOptions, string) => option(int) = "";
+
+[@bs.get_index]
 external getOptionAsBoolean: (actionFnOptions, string) => option(bool) = "";
 
 /**
@@ -92,3 +95,31 @@ let getOptionAsBoolean = (actionFnOptions, optionName): bool => {
 external optionWithDefault: (string, string, string) => t = "option";
 [@bs.send.pipe: t] external parse: array(string) => t = "parse";
 [@bs.send.pipe: t] external version: string => t = "version";
+
+// commander.js' .option() also accepts a validator-function provided as the third argument,
+//                         if so, the forth argument is the default value, not the third as usual
+[@bs.send.pipe: t]
+external optionWithIntDefault: (string, string, string => int, int) => t =
+  "option";
+
+let optionWithIntDefault = (name, description, defaultValue) => {
+  optionWithIntDefault(
+    name,
+    description,
+    valueProvidedByEndUser =>
+      try (int_of_string(valueProvidedByEndUser)) {
+      | Failure(_) =>
+        Js.log(
+          "Invalid number value ("
+          ++ valueProvidedByEndUser
+          ++ ") provided to "
+          ++ name
+          ++ ", will be using "
+          ++ string_of_int(defaultValue)
+          ++ " instead.",
+        );
+        defaultValue;
+      },
+    defaultValue,
+  );
+};

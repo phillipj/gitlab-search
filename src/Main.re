@@ -37,10 +37,18 @@ let setup = (args, options) => {
   let directory = Belt.Option.getExn(Commander.getOption(options, "dir"));
   let domainOrRootUri =
     Belt.Option.getExn(Commander.getOption(options, "apiDomain"));
+  let concurrency =
+    Belt.Option.getExn(Commander.getOptionAsInt(options, "concurrency"));
   let ignoreSSL = Commander.getOptionAsBoolean(options, "ignoreSsl");
 
   let configPath =
-    Config.writeToFile(~domainOrRootUri, ~ignoreSSL, ~token, ~directory);
+    Config.writeToFile(
+      ~domainOrRootUri,
+      ~ignoreSSL,
+      ~token,
+      ~directory,
+      ~concurrency,
+    );
   Print.successful(
     "Successfully wrote config to "
     ++ configPath
@@ -85,6 +93,11 @@ Commander.(
        "--dir <path>",
        "path to directory to save configuration file in",
        Config.defaultDirectory,
+     )
+  |> optionWithIntDefault(
+       "--concurrency <number>",
+       "limit the amount of concurrent HTTPS requests sent to GitLab when searching,\nuseful when *many* projects are hosted on a small GitLab instance\nto avoid overwhelming the instance resulting in 502 errors",
+       Config.defaultConcurrency,
      )
   |> action(setup)
 );
