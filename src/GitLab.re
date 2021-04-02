@@ -62,15 +62,22 @@ module Decode = {
 
 let configResult = Config.loadFromFile();
 
-let createHttpsAgent = (config: Config.t) => {
-  switch (config.protocol) {
-  | HTTP => None
-  | HTTPS =>
-    Axios.Agent.Https.config(~rejectUnauthorized=!config.ignoreSSL, ())
-    ->Axios.Agent.Https.create
-    ->Some
+let httpsAgent =
+  switch (configResult) {
+  | Belt.Result.Ok(config) =>
+    switch (config.protocol) {
+    | HTTP => None
+    | HTTPS =>
+      Axios.Agent.Https.config(
+        ~rejectUnauthorized=!config.ignoreSSL,
+        ~maxSockets=config.concurrency,
+        (),
+      )
+      ->Axios.Agent.Https.create
+      ->Some
+    }
+  | Belt.Result.Error(_) => None
   };
-};
 
 let debugLog = (text): unit => {
   let isDebugEnabled = !Js.Nullable.isNullable(debugEnv);
@@ -89,7 +96,6 @@ let request = (relativeUrl, decoder) => {
     };
 
   let headers = Axios.Headers.fromObj({"Private-Token": config.token});
-  let httpsAgent = createHttpsAgent(config);
   let options = Axios.makeConfig(~headers, ~httpsAgent?, ());
   let scheme = Config.Protocol.toString(config.protocol) ++ "://";
   let url = scheme ++ config.domain ++ "/api/v4" ++ relativeUrl;
@@ -160,7 +166,6 @@ let rec paginatedRequest = (url: requestUrl, decoder: Js.Json.t => array('a)) =>
     };
 
   let headers = Axios.Headers.fromObj({"Private-Token": config.token});
-  let httpsAgent = createHttpsAgent(config);
   let options = Axios.makeConfig(~headers, ~httpsAgent?, ());
   let scheme = Config.Protocol.toString(config.protocol) ++ "://";
   let urlToRequest =
