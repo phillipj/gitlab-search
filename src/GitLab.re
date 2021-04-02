@@ -64,7 +64,11 @@ let createHttpsAgent = (config: Config.t) => {
   switch (config.protocol) {
   | HTTP => None
   | HTTPS =>
-    Axios.Agent.Https.config(~rejectUnauthorized=!config.ignoreSSL, ())
+    Axios.Agent.Https.config(
+      ~rejectUnauthorized=!config.ignoreSSL,
+      ~maxSockets=1,
+      (),
+    )
     ->Axios.Agent.Https.create
     ->Some
   };
