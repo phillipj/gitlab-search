@@ -41,7 +41,9 @@ let searchResults =
           ++ highlightMatchedTerm(term, indentPreview(current.data))
         );
 
-      Js.log(bold(green(project.name ++ ":")));
+      let archivedInfo = project.archived ? bold(red(" (archived)")) : "";
+
+      Js.log(bold(green(project.name ++ archivedInfo ++ ":")));
       Js.log(formattedResults);
     },
   );

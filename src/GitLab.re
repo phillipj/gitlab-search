@@ -11,6 +11,7 @@ type project = {
   id: int,
   name: string,
   web_url: string,
+  archived: bool,
 };
 
 type searchFilter =
@@ -43,6 +44,7 @@ module Decode = {
     id: json |> field("id", int),
     name: json |> field("name", string),
     web_url: json |> field("web_url", string),
+    archived: json |> field("archived", bool),
   };
   let projects = json => json |> array(project);
 
