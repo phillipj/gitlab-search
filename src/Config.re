@@ -24,6 +24,7 @@ type t = {
   token: string,
   ignoreSSL: bool,
   protocol: Protocol.t,
+  concurrency: int,
 };
 
 // As the type below is passed to JavaScript as a configuration object,
@@ -41,6 +42,8 @@ type serialisedConfig = {
   config: string,
   [@bs.optional]
   ignoreSSL: bool,
+  [@bs.optional]
+  concurrency: int,
 };
 
 // https://www.npmjs.com/package/rc
@@ -48,6 +51,7 @@ type serialisedConfig = {
 
 let defaultDomain = "gitlab.com";
 let defaultDirectory = ".";
+let defaultConcurrency = 25;
 
 let parseProtocolAndDomain = rootApiUriOrOnlyDomain => {
   let splitOnScheme =
@@ -70,6 +74,8 @@ let parseProtocolAndDomain = rootApiUriOrOnlyDomain => {
 let loadFromFile = (): Belt.Result.t(t, string) => {
   let result = rc("gitlabsearch");
   let ignoreSSL = Option.getWithDefault(ignoreSSLGet(result), false);
+  let concurrency =
+    Option.getWithDefault(concurrencyGet(result), defaultConcurrency);
   let (protocol, domain) =
     domainGet(result)
     ->Option.getWithDefault(defaultDomain)
@@ -85,7 +91,7 @@ let loadFromFile = (): Belt.Result.t(t, string) => {
         ++ ", please run setup again!",
       ),
       token =>
-      Result.Ok({domain, token, ignoreSSL, protocol})
+      Result.Ok({domain, concurrency, token, ignoreSSL, protocol})
     )
   | None =>
     Result.Error(
@@ -95,12 +101,21 @@ let loadFromFile = (): Belt.Result.t(t, string) => {
 };
 
 let writeToFile =
-    (~domainOrRootUri: string, ~ignoreSSL: bool, ~token: string, ~directory) => {
+    (
+      ~domainOrRootUri: string,
+      ~ignoreSSL: bool,
+      ~token: string,
+      ~directory,
+      ~concurrency,
+    ) => {
   let filePath = Node.Path.join2(directory, ".gitlabsearchrc");
   let domain =
     domainOrRootUri == defaultDomain ? None : Some(domainOrRootUri);
   let ignoreSSL = ignoreSSL ? Some(true) : None;
-  let content = serialisedConfig(~domain?, ~ignoreSSL?, ~token, ());
+  let concurrency =
+    concurrency == defaultConcurrency ? None : Some(concurrency);
+  let content =
+    serialisedConfig(~domain?, ~ignoreSSL?, ~token, ~concurrency?, ());
 
   Node.Fs.writeFileSync(
     filePath,

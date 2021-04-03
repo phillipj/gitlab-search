@@ -68,7 +68,7 @@ let httpsAgent =
     | HTTPS =>
       Axios.Agent.Https.config(
         ~rejectUnauthorized=!config.ignoreSSL,
-        ~maxSockets=1,
+        ~maxSockets=config.concurrency,
         (),
       )
       ->Axios.Agent.Https.create
