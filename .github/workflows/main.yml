@@ -18,3 +18,15 @@ jobs:
         run: |
           npm ci
           npm run build
+  deploy-to-docker:
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_USERNAME: "${{ secrets.docker_hub_username }}"
+      DOCKER_PASSWORD: "${{ secrets.docker_hub_password }}"
+    steps:
+      - echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
+      - docker build -t gitlab-search .
+      - docker tag gitlab-search "${DOCKER_USERNAME}/gitlab-search:${{ github.sha }}"
+      - docker tag gitlab-search "${DOCKER_USERNAME}/gitlab-search:latest"
+      - docker push "${DOCKER_USERNAME}/gitlab-search:${{ github.sha }}"
+      - docker push "${DOCKER_USERNAME}/gitlab-search:latest"
