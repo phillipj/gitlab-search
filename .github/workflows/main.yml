@@ -26,6 +26,7 @@ jobs:
       DOCKER_USERNAME: "${{ secrets.docker_hub_username }}"
       DOCKER_PASSWORD: "${{ secrets.docker_hub_password }}"
     steps:
+      - uses: actions/checkout@v2
       - run: |
          echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
          docker build -t gitlab-search .
