@@ -20,6 +20,8 @@ jobs:
           npm run build
   deploy-to-docker:
     runs-on: ubuntu-latest
+    needs:
+      - build
     env:
       DOCKER_USERNAME: "${{ secrets.docker_hub_username }}"
       DOCKER_PASSWORD: "${{ secrets.docker_hub_password }}"
