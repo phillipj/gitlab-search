@@ -42,6 +42,7 @@ Options:
   -f, --filename <filename>                only search for contents in given a file, glob matching with wildcards (*)
   -e, --extension <file-extension>         only search for contents in files with given extension
   -p, --path <path>                        only search in files in the given path
+  -a, --archive [all,only,exclude]         search only in archived projects, exclude archived projects, search in all projects (default is all)
   -h, --help                               output usage information
 
 Commands:
