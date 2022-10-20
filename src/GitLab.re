@@ -227,7 +227,12 @@ let fetchGroups = (groupsNames: option(string)) => {
 };
 
 // https://docs.gitlab.com/ee/api/groups.html#list-a-groups-projects
-let fetchProjectsInGroups = (groups: array(group)) => {
+let fetchProjectsInGroups = (archiveArgument: option(string), groups: array(group)) => {
+  let archiveQueryParam = switch (archiveArgument) {
+    | Some("only") => "&archived=true";
+    | Some("exclude") => "&archived=false";
+    | _ => "";
+  };
   let requests =
     Array.map(
       groups,
@@ -236,7 +241,7 @@ let fetchProjectsInGroups = (groups: array(group)) => {
       // explicit information about the incoming function argument is a list of groups
       (group: group) =>
       paginatedRequest(
-        RelativeUrl("/groups/" ++ group.id ++ "/projects?per_page=100"),
+        RelativeUrl("/groups/" ++ group.id ++ "/projects?per_page=100" ++ archiveQueryParam),
         Decode.projects,
       )
     );

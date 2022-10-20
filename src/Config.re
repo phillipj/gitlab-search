@@ -52,6 +52,7 @@ type serialisedConfig = {
 let defaultDomain = "gitlab.com";
 let defaultDirectory = ".";
 let defaultConcurrency = 25;
+let defaultArchive = "all";
 
 let parseProtocolAndDomain = rootApiUriOrOnlyDomain => {
   let splitOnScheme =

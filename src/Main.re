@@ -19,7 +19,7 @@ let main = (args, options) => {
 
   Js.Promise.(
     GitLab.fetchGroups(groups)
-    |> then_(GitLab.fetchProjectsInGroups)
+    |> then_(GitLab.fetchProjectsInGroups(getOption("archive")))
     |> then_(GitLab.searchInProjects(criterias))
     |> then_(results =>
          resolve(Print.searchResults(criterias.term, results))
@@ -72,6 +72,11 @@ Commander.(
        "only search for contents in files with given extension",
      )
   |> option("-p, --path <path>", "only search in files in the given path")
+  |> optionWithDefault(
+      "-a, --archive [all,only,exclude]",
+      "to only search on archived repositories, or to exclude them, by default the search will be apply to all repositories",
+      Config.defaultArchive,
+  )
   |> action(main)
 );
 
