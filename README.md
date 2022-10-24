@@ -15,6 +15,13 @@ when needed.
 $ npm install -g gitlab-search
 ```
 
+You can also use it in Docker:
+
+```sh
+$ docker run --rm -v "/path/to/.gitlabsearchrc:/app/.gitlabsearchrc" \
+  carlosnunez/gitlab-search
+```
+
 To finish the installation you need to configure the personal access token you've created previously:
 
 ```
