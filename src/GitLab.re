@@ -227,7 +227,12 @@ let fetchGroups = (groupsNames: option(string)) => {
 };
 
 // https://docs.gitlab.com/ee/api/groups.html#list-a-groups-projects
-let fetchProjectsInGroups = (archiveArgument: option(string), groups: array(group)) => {
+let fetchProjectsInGroups = (archiveArgument: option(string), isRecursive: option(string), groups: array(group)) => {
+  let recursiveParam = switch (isRecursive) {
+    | None => "";
+    | _ => "&include_subgroups=true";
+  };
+  
   let archiveQueryParam = switch (archiveArgument) {
     | Some("only") => "&archived=true";
     | Some("exclude") => "&archived=false";
@@ -241,7 +246,7 @@ let fetchProjectsInGroups = (archiveArgument: option(string), groups: array(grou
       // explicit information about the incoming function argument is a list of groups
       (group: group) =>
       paginatedRequest(
-        RelativeUrl("/groups/" ++ group.id ++ "/projects?per_page=100" ++ archiveQueryParam),
+        RelativeUrl("/groups/" ++ group.id ++ "/projects?per_page=100" ++ archiveQueryParam ++ recursiveParam),
         Decode.projects,
       )
     );

@@ -19,7 +19,7 @@ let main = (args, options) => {
 
   Js.Promise.(
     GitLab.fetchGroups(groups)
-    |> then_(GitLab.fetchProjectsInGroups(getOption("archive")))
+    |> then_(GitLab.fetchProjectsInGroups(getOption("archive"), getOption("recursive")))
     |> then_(GitLab.searchInProjects(criterias))
     |> then_(results =>
          resolve(Print.searchResults(criterias.term, results))
@@ -63,6 +63,7 @@ Commander.(
        "-g, --groups <group-names>",
        "group(s) to find repositories in (separated with comma)",
      )
+  |> option("-r, --recursive", "Search recursively in projects in the given groups")
   |> option(
        "-f, --filename <filename>",
        "only search for contents in given a file, glob matching with wildcards (*)",
