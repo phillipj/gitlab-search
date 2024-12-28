@@ -1,10 +1,8 @@
 {
   "name": "gitlab-search",
-  "version": "1.5.0",
+  "version": "2.0.0-beta1",
   "scripts": {
-    "build": "rimraf dist && bsb -make-world && ncc build lib/js/src/Main.bs.js --out dist",
-    "start": "bsb -make-world -w",
-    "clean": "bsb -clean-world",
+    "build": "rimraf dist && npx tsc && ncc build dist/src/main.js --out dist",
     "prepublish": "npm run build"
   },
   "keywords": [
@@ -12,20 +10,28 @@
   ],
   "author": "Phillip Johnsen <johphi@gmail.com>",
   "license": "MIT",
-  "repository": "github:phillipj/gitlab-search",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/phillipj/gitlab-search.git"
+  },
   "files": [
     "bin",
     "dist"
   ],
-  "bin": "bin/gitlab-search.js",
+  "bin": {
+    "gitlab-search": "bin/gitlab-search.js"
+  },
   "devDependencies": {
-    "@glennsl/bs-json": "^5.0.2",
-    "@zeit/ncc": "^0.22.0",
-    "bs-axios": "0.0.43",
-    "bs-chalk": "^0.2.1",
-    "bs-platform": "^5.2.1",
+    "@types/node": "^22.10.2",
+    "@types/rc": "^1.2.4",
+    "@vercel/ncc": "^0.38.3",
     "commander": "^5.0.0",
     "rc": "^1.2.8",
-    "rimraf": "^3.0.2"
+    "rimraf": "^3.0.2",
+    "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "axios": "^1.7.9",
+    "chalk": "^5.4.1"
   }
 }
