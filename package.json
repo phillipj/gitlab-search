@@ -10,12 +10,17 @@
   ],
   "author": "Phillip Johnsen <johphi@gmail.com>",
   "license": "MIT",
-  "repository": "github:phillipj/gitlab-search",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/phillipj/gitlab-search.git"
+  },
   "files": [
     "bin",
     "dist"
   ],
-  "bin": "bin/gitlab-search.js",
+  "bin": {
+    "gitlab-search": "bin/gitlab-search.js"
+  },
   "devDependencies": {
     "@types/node": "^22.10.2",
     "@types/rc": "^1.2.4",
