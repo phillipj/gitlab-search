@@ -1,6 +1,6 @@
 {
   "name": "gitlab-search",
-  "version": "1.5.0",
+  "version": "2.0.0-beta1",
   "scripts": {
     "build": "rimraf dist && npx tsc && ncc build dist/src/main.js --out dist",
     "prepublish": "npm run build"
